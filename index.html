@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luxury Quiz App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f8f8 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .quiz-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quiz-header {
+            background: #ec4899;
+            color: white;
+            padding: 25px 40px;
+            margin: -40px -40px 30px -40px;
+            border-radius: 20px 20px 0 0;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .quiz-header h1 {
+            font-size: 2.2em;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: 600;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: rgba(236, 72, 153, 0.2);
+            margin-bottom: 30px;
+            border-radius: 2px;
+        }
+
+        .progress {
+            height: 100%;
+            background: #ec4899;
+            width: 0;
+            transition: width 0.4s ease;
+        }
+
+        .question-container {
+            margin-bottom: 30px;
+        }
+
+        .question-number {
+            color: #ec4899;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .question {
+            color: #111827;
+            font-size: 24px;
+            line-height: 1.4;
+            margin-bottom: 30px;
+        }
+
+        .options-container {
+            display: grid;
+            gap: 15px;
+        }
+
+        .option {
+            background: white;
+            border: 2px solid #e5e7eb;
+            padding: 18px 25px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+        }
+
+        .option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(236, 72, 153, 0.1);
+        }
+
+        .option.correct {
+            border-color: #10b981;
+            background: #10b98110;
+        }
+
+        .option.wrong {
+            border-color: #ef4444;
+            background: #ef444410;
+        }
+
+        .next-btn {
+            background: #ec4899;
+            color: white;
+            border: none;
+            padding: 16px 35px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            float: right;
+            transition: all 0.3s ease;
+            margin-top: 25px;
+        }
+
+        .next-btn:hover {
+            background: #db2777;
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(236, 72, 153, 0.3);
+        }
+
+        .score-container {
+            text-align: center;
+            padding: 40px;
+            display: none;
+        }
+
+        .score-text {
+            color: #ec4899;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .score-number {
+            font-size: 48px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 30px;
+        }
+
+        .restart-btn {
+            background: #1f2937;
+            color: white;
+            padding: 15px 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .restart-btn:hover {
+            background: #111827;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .quiz-container {
+                padding: 25px;
+            }
+            
+            .question {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <div class="quiz-header">
+            <h1>Tech Master Quiz</h1>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress"></div>
+        </div>
+        
+        <div class="question-container">
+            <div class="question-number">Question <span id="current-question">1</span>/5</div>
+            <div class="question" id="question"></div>
+            <div class="options-container" id="options"></div>
+            <button class="next-btn" onclick="nextQuestion()">Next →</button>
+        </div>
+        <div class="score-container">
+            <div class="score-text">Your Score</div>
+            <div class="score-number"><span id="final-score">0</span>/5</div>
+            <button class="restart-btn" onclick="restartQuiz()">Restart Quiz</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "What is the time complexity of a binary search algorithm?",
+                options: ["O(n)", "O(1)", "O(log n)", "O(n log n)"],
+                correct: 2
+            },
+            {
+                question: "Which of these is NOT a valid CSS positioning value?",
+                options: ["relative", "center", "fixed", "sticky"],
+                correct: 1
+            },
+            {
+                question: "What does the 'SOLID' principle in OOP stand for?",
+                options: [
+                    "Single Responsibility, Open-Closed, Liskov Substitution, Interface Segregation, Dependency Inversion",
+                    "Structured Object Layout, Interface Design, Liskov Principle",
+                    "System Oriented Language Interface Design",
+                    "Software Optimization & Logical Implementation Design"
+                ],
+                correct: 0
+            },
+            {
+                question: "Which HTML5 element is used for side content?",
+                options: ["<div>", "<aside>", "<section>", "<nav>"],
+                correct: 1
+            },
+            {
+                question: "What is the main purpose of React's virtual DOM?",
+                options: [
+                    "To enable server-side rendering",
+                    "To improve rendering performance",
+                    "To manage component state",
+                    "To handle routing"
+                ],
+                correct: 1
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let answerSelected = false;
+
+        function initializeQuiz() {
+            showQuestion(currentQuestion);
+            updateProgress();
+        }
+
+        function showQuestion(index) {
+            const question = questions[index];
+            document.getElementById('question').textContent = question.question;
+            document.getElementById('current-question').textContent = index + 1;
+            
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, i) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option';
+                optionElement.innerHTML = `
+                    <span>${String.fromCharCode(65 + i)}.</span>
+                    <span style="margin-left: 12px;">${option}</span>
+                `;
+                optionElement.onclick = () => selectAnswer(i, optionElement);
+                optionsContainer.appendChild(optionElement);
+            });
+        }
+
+        function selectAnswer(selectedIndex, element) {
+            if (answerSelected) return;
+            answerSelected = true;
+            
+            const question = questions[currentQuestion];
+            const options = document.querySelectorAll('.option');
+            
+            options.forEach((option, i) => {
+                if (i === question.correct) {
+                    option.classList.add('correct');
+                } else if (i === selectedIndex && i !== question.correct) {
+                    option.classList.add('wrong');
+                }
+            });
+
+            if (selectedIndex === question.correct) score++;
+        }
+
+        function nextQuestion() {
+            if (!answerSelected) return;
+            
+            answerSelected = false;
+            currentQuestion++;
+            
+            if (currentQuestion < questions.length) {
+                showQuestion(currentQuestion);
+                updateProgress();
+            } else {
+                showFinalScore();
+            }
+        }
+
+        function updateProgress() {
+            const progress = (currentQuestion / questions.length) * 100;
+            document.querySelector('.progress').style.width = `${progress}%`;
+        }
+
+        function showFinalScore() {
+            document.querySelector('.question-container').style.display = 'none';
+            document.querySelector('.score-container').style.display = 'block';
+            document.querySelector('.progress-bar').style.display = 'none';
+            document.getElementById('final-score').textContent = score;
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            document.querySelector('.question-container').style.display = 'block';
+            document.querySelector('.score-container').style.display = 'none';
+            document.querySelector('.progress-bar').style.display = 'block';
+            initializeQuiz();
+            updateProgress();
+        }
+
+        // Initialize quiz
+        initializeQuiz();
+    </script>
+</body>
+</html>
